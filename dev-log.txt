@@ -1,0 +1,5 @@
+Day 1
+#1 - Initialize Project - 8/23 - 12PM
+#2 - Understand Models Class, Particularly Following Class - 12:05PM
+#3 - Added Logout Function - 12:15PM
+#4 - Added Header BG to User-Profile-Page - 12:33 PM
