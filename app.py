@@ -116,7 +116,7 @@ def logout():
     """Handle logout of user."""
 
     # IMPLEMENT THIS
-    user = User.query.get(session[CURR_USER_KEY])
+    user = g.user
     do_logout()
     flash(f'Goodbye {user.username}', 'success')
     return redirect('/login')
@@ -183,6 +183,16 @@ def users_followers(user_id):
     return render_template('users/followers.html', user=user)
 
 
+@app.route('/users/<int:user_id>/liked')
+def show_liked_messages(user_id):
+    """Show liked messages from user."""
+    if not g.user:
+        flash('Please log in.', 'danger')
+        return redirect('/')
+    messages = g.user.likes
+    return render_template('users/liked.html', messages=messages, user=g.user)
+
+
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
@@ -221,15 +231,14 @@ def profile():
     if not g.user:
         flash('Access unauthorized.', 'danger')
         return redirect('/')
-    user = User.query.get(session[CURR_USER_KEY])
     form = UserEditForm()
     if request.method == 'GET':
-        form.username.data = user.username
-        form.email.data = user.email
-        if user.bio:
-            form.bio.data = user.bio
+        form.username.data = g.user.username
+        form.email.data = g.user.email
+        if g.user.bio:
+            form.bio.data = g.user.bio
     if form.validate_on_submit():
-        user = User.authenticate(user.username,
+        user = User.authenticate(g.user.username,
                                  form.password.data)
         if user:
             user.username = form.username.data
@@ -242,11 +251,28 @@ def profile():
                 user.header_image_url = form.header_image_url.data
             db.session.commit()
             flash('Profile updated.', 'success')
-            return redirect(f'/users/{user.id}')
+            return redirect(f'/users/{g.user.id}')
         else:
             flash('Invalid username or password', 'danger')
             return redirect('/')
-    return render_template('/users/edit.html', user=user, form=form)
+    return render_template('/users/edit.html', user=g.user, form=form)
+
+
+@app.route('/users/add_like/<int:message_id>', methods=['POST'])
+def toggle_message_like(message_id):
+    """Adds a message to a user's liked messages"""
+    if not g.user:
+        flash('Please log in.', 'danger')
+        return redirect('/')
+    msg = Message.query.get(message_id)
+    if msg in g.user.likes:
+        g.user.likes.remove(msg)
+        flash('Unliked Message', 'success')
+    else:
+        g.user.likes.append(msg)
+        flash(f'Liked Message', 'success')
+    db.session.commit()
+    return redirect('/')
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -332,7 +358,7 @@ def homepage():
         print(followed_users)
         messages = Message.query.join(Message.user).filter(User.id.in_(
             user.id for user in followed_users) | (User.id == curr_user.id)).order_by(Message.timestamp.desc()).limit(100).all()
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, user=g.user)
     else:
         return render_template('home-anon.html')
 
