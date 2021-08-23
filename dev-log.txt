@@ -6,3 +6,4 @@ Day 1
 #5 - Added Bio/Location from User Model to User Detail HTML Template - 12:36PM
 #6 - Fixed User Cards to Show Bios for Users on Followers, Following, and List-Users Pages - 12:58PM
 #7 - Fixed Profile Edit Page - 1:27PM
+#8 - Fixed Home Page to only show users that the logged-in user is following as well as that user.

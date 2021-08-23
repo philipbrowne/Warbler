@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
 from models import db, connect_db, User, Message
@@ -224,19 +225,19 @@ def profile():
     form = UserEditForm()
     if request.method == 'GET':
         form.username.data = user.username
-        form.email.data = user.email 
+        form.email.data = user.email
         if user.bio:
             form.bio.data = user.bio
     if form.validate_on_submit():
         user = User.authenticate(user.username,
                                  form.password.data)
-        if user:  
+        if user:
             user.username = form.username.data
             user.email = form.email.data
             if form.bio.data:
                 user.bio = form.bio.data
             if form.image_url.data:
-                user.image_url = form.image_url.data 
+                user.image_url = form.image_url.data
             if form.header_image_url.data:
                 user.header_image_url = form.header_image_url.data
             db.session.commit()
@@ -246,8 +247,6 @@ def profile():
             flash('Invalid username or password', 'danger')
             return redirect('/')
     return render_template('/users/edit.html', user=user, form=form)
-    
-    
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -328,14 +327,12 @@ def homepage():
     """
 
     if g.user:
-        messages = (Message
-                    .query
-                    .order_by(Message.timestamp.desc())
-                    .limit(100)
-                    .all())
-
+        curr_user = User.query.get(g.user.id)
+        followed_users = curr_user.following
+        print(followed_users)
+        messages = Message.query.join(Message.user).filter(User.id.in_(
+            user.id for user in followed_users) | (User.id == curr_user.id)).order_by(Message.timestamp.desc()).limit(100).all()
         return render_template('home.html', messages=messages)
-
     else:
         return render_template('home-anon.html')
 
@@ -347,7 +344,7 @@ def homepage():
 #
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
 
-@app.after_request
+@ app.after_request
 def add_header(req):
     """Add non-caching headers on every request."""
 
