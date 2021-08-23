@@ -3,3 +3,4 @@ Day 1
 #2 - Understand Models Class, Particularly Following Class - 12:05PM
 #3 - Added Logout Function - 12:15PM
 #4 - Added Header BG to User-Profile-Page - 12:33 PM
+#5 - Added Bio/Location from User Model to User Detail HTML Template - 12:36PM
