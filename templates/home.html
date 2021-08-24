@@ -31,7 +31,7 @@
           <li class="stat">
             <p class="small">Liked</p>
             <h4>
-              <a href="/users/{{ g.user.id }}/liked">{{ g.user.likes | length }}</a>
+              <a href="/users/{{ g.user.id }}/liked" id="likednum">{{ g.user.likes | length }}</a>
             </h4>
           </li>
         </ul>
@@ -49,11 +49,11 @@
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
           <p>{{ msg.text }}</p>
         </div>
-        <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form"><button class="
-                            btn 
+        <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form" class="{{msg.id}}"><button class="likebtn btn 
                             btn-sm 
-                            {{'btn-primary' if msg in user.likes else 'btn-secondary'}}"> {% if msg in user.likes %} <i
-              class="fas fa-star liked"></i> {% else %} <i class="fa fa-thumbs-up"></i> {% endif %} </button>
+                            {{'btn-primary liked' if msg in user.likes else 'btn-secondary unliked'}}"> {% if msg in
+            user.likes %} <i class="fas fa-star liked"></i> {% else %} <i class="fa fa-thumbs-up"></i> {% endif %}
+          </button>
         </form>
       </li> {% endfor %} </ul>
   </div>

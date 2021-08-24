@@ -11,12 +11,12 @@
                     <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
                     <p>{{ msg.text }}</p>
                 </div>
-                <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form"> <button class="
-                    btn 
-                    btn-sm 
-                    {{'btn-primary' if msg in user.likes else 'btn-secondary'}}"> {% if msg in user.likes %} <i
-                            class="fas fa-star liked"></i> {% else %} <i class="fa fa-thumbs-up"></i> {% endif %}
-                    </button>
+                <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form" class="{{msg.id}}"><button
+                        class="userlikebtn btn 
+                                            btn-sm 
+                                            {{'btn-primary liked' if msg in user.likes else 'btn-secondary unliked'}}">
+                        {% if msg in user.likes %} <i class="fas fa-star liked"></i> {% else %} <i
+                            class="fa fa-thumbs-up"></i> {% endif %} </button>
                 </form>
             </li> {% endfor %} </ul>
     </div>

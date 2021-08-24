@@ -55,6 +55,12 @@ def do_logout():
         del session[CURR_USER_KEY]
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('404.html'), 404
+
+
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
     """Handle user signup.
@@ -114,11 +120,11 @@ def login():
 @app.route('/logout')
 def logout():
     """Handle logout of user."""
-
-    # IMPLEMENT THIS
-    user = g.user
+    if not g.user:
+        flash('Please log in', 'danger')
+        return redirect('/login')
     do_logout()
-    flash(f'Goodbye {user.username}', 'success')
+    flash(f'Goodbye {g.user.username}', 'success')
     return redirect('/login')
 
 
@@ -216,7 +222,7 @@ def stop_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get(follow_id)
+    followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
     db.session.commit()
 
@@ -264,15 +270,13 @@ def toggle_message_like(message_id):
     if not g.user:
         flash('Please log in.', 'danger')
         return redirect('/')
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
     if msg in g.user.likes:
         g.user.likes.remove(msg)
-        flash('Unliked Message', 'success')
     else:
         g.user.likes.append(msg)
-        flash(f'Liked Message', 'success')
     db.session.commit()
-    return redirect('/')
+    return 'Toggled Message Like'
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -321,7 +325,7 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
 
 
@@ -333,7 +337,12 @@ def messages_destroy(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
+
+    if g.user.id != msg.user_id:
+        flash("Access unauthorized", 'danger')
+        return redirect('/')
+
     db.session.delete(msg)
     db.session.commit()
 
@@ -353,6 +362,7 @@ def homepage():
     """
 
     if g.user:
+        form = MessageForm()
         curr_user = User.query.get(g.user.id)
         followed_users = curr_user.following
         print(followed_users)

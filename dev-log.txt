@@ -11,3 +11,6 @@ Day 1
 BREAK
 
 #9 - Added Like functionality and Like Routes
+
+Day 2
+#10 - Added Testing and Further Studyu - 8/24 - 9 AM

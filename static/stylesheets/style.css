@@ -545,3 +545,7 @@ p.card-bio {
 .liked {
   color: gold;
 }
+
+.notfound {
+  max-width: 600px;
+}

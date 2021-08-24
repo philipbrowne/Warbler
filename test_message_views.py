@@ -48,11 +48,14 @@ class MessageViewTestCase(TestCase):
                                     email="test@test.com",
                                     password="testuser",
                                     image_url=None)
-
         db.session.commit()
 
+    def tearDown(self):
+        """Clean up any fouled DB transactions"""
+        db.session.rollback()
+
     def test_add_message(self):
-        """Can use add a message?"""
+        """Can user add a message?"""
 
         # Since we need to change the session to mimic logging in,
         # we need to use the changing-session trick:
@@ -71,3 +74,88 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+        
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            html = resp.get_data(as_text=True)
+            self.assertIn('Hello', html)
+            
+    def test_view_msg_logged_in(self):
+        """Tests viewing a message while logged in"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            resp = c.post("/messages/new", data={"text": "Hello"})
+            msg = Message.query.one()
+            resp = c.get(f'/messages/{msg.id}')
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code,200)
+            self.assertIn('Hello', html)
+    
+    def test_invalid_message(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            resp = c.get('/messages/43463325622346542266432')
+            self.assertEqual(resp.status_code,404)
+    
+            
+    def test_loggedout_msg_add(self):
+        """Tests add message functions while logged out"""
+        with self.client as c:
+            resp = c.get('/messages/new', follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Access unauthorized', html)
+            resp = c.post("/messages/new", data={"text": "Hello2"}, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Access unauthorized', html)
+    
+    def test_delete_msg(self):
+        """Tests deleting message while logged in and logged out"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            resp = c.post("/messages/new", data={"text": "DELETE_ME"}, follow_redirects=True)
+            msg=Message.query.one()
+            resp = c.post(f'/messages/{msg.id}/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn('DELETE_ME', html)
+            resp = c.post("/messages/new", data={"text": "DELETE_ME_AGAIN"}, follow_redirects=True)
+            msg=Message.query.one()
+            resp = c.get('/logout')
+            resp = c.post(f'/messages/{msg.id}/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Access unauthorized', html)
+    
+    def test_other_user_msg(self):
+        """Tests attempting to delete another user's messages"""
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            testuser2 = User.signup(username="testuser2",
+                                    email="test2@test.com",
+                                    password="testuser2",
+                                    image_url=None)
+            db.session.commit()
+            test_msg = Message(text='TEST_MSG', user_id=testuser2.id)
+            db.session.add(test_msg)
+            db.session.commit()
+            resp = c.post(f'/messages/{test_msg.id}/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Access unauthorized', html)
+            
+            
+        
+        
+            
+            
+        
+            
