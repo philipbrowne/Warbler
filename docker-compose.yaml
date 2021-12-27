@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    ports:
+      - '8000:80'
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/warbler
+    depends_on:
+      - postgres
+  postgres:
+    build:
+      context: .
+      dockerfile: postgres.dockerfile
+    volumes:
+      - docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_MULTIPLE_DATABASES=warbler,warblertest
+volumes:
+  docker-postgresql-multiple-databases:
