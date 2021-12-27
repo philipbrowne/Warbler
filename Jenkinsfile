@@ -7,9 +7,6 @@ node {
       if (!fileExists("Dockerfile")) {
          error('Dockerfile missing.')
       }
-      if (!fileExists("docker-compose.yaml")) {
-         error('Docker Compose missing.')
-      }
    }
    stage('Build Docker Image from Docker Compose') {
        // build the docker image from the source code using the BUILD_ID parameter in image name
