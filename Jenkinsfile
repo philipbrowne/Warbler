@@ -2,8 +2,7 @@ node {
    stage('Get Source') {
       // copy source code from local file system and test
       // for a Dockerfile to build the Docker image
-      git branch: 'main', 
-      url: 'https://github.com/philipbrowne/Warbler.git'
+      git url: 'https://github.com/philipbrowne/Warbler.git'
       if (!fileExists("Dockerfile")) {
          error('Dockerfile missing.')
       }
