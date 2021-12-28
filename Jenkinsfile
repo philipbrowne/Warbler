@@ -5,9 +5,8 @@ pipeline {
          steps{
             sh "docker-compose up -d"
             echo "Docker Containers Running"
-            sh "docker ps"
-            sh 'echo "Running First Unit Test"'
-            sh "docker-compose run web python3 -m /var/www/app/test_message_model.py"
+            echo "Seeding Database"
+            sh "docker exec -it warbler_web_1 python3 /var/www/app/seed.py"
             }
          }
    // stage('Build Docker Image from Docker Compose') {
