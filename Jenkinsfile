@@ -3,9 +3,11 @@ pipeline {
    stages{
       stage ('Assemble Container') {
          steps{
-            sh "docker-compose up"
+            sh "docker-compose up -d"
             echo "Docker Containers Running"
             sh "docker ps"
+            sh 'echo "Running First Unit Test"'
+            sh "docker-compose run web python3 -m /var/www/app/test_message_model.py"
             }
          }
    // stage('Build Docker Image from Docker Compose') {
