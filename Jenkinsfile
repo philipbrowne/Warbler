@@ -3,7 +3,7 @@ pipeline {
    stages{
       stage ('Assemble Container') {
          steps{
-            sh "which docker-compose"
+            sh "docker version"
             // sh "docker-compose up"
             // echo "Docker Containers Running"
             // sh "docker ps"
