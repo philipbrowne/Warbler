@@ -6,7 +6,7 @@ pipeline {
             sh "docker-compose up -d"
             echo "Docker Containers Running"
             echo "Seeding Database"
-            sh "docker exec warblerpipeline_web_1 python3 /var/www/app/seed.py"
+            sh 'docker exec -i warblerpipeline_web_1 bash -c "cd /var/www/app && python3 seed.py"'
             }
       }
       // stage ('Run Tests') {
