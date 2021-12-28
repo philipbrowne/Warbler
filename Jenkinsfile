@@ -1,10 +1,11 @@
 pipeline {
    agent any
    stages{
-      stage ('Get Source') {
+      stage ('Assemble Container') {
          steps{
-            sh 'ls'
-            echo "This is your project directory"
+            sh "docker-compose up"
+            echo "Docker Containers Running"
+            sh "docker ps"
             }
          }
    // stage('Build Docker Image from Docker Compose') {
