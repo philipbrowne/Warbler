@@ -14,5 +14,10 @@ pipeline {
             sh 'docker exec -i warblerpipeline_web_1 bash -c "cd /var/www/app && python3 -m unittest"'
             }
          }
+      stage ('Shutdown Containers'){
+         steps{
+            sh "docker-compose down"
+         }
+      }
    }
 }
