@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 RUN apt-get update -y 
-RUN apt-get install --no-install-recommends -y apache2 libapache2-mod-wsgi-py3 wget python3-pip chromium-driver
+RUN apt-get install --no-install-recommends -y apache2 libapache2-mod-wsgi-py3 wget python3-pip
 RUN a2enmod wsgi
 RUN adduser --system --group --disabled-login user ; cd /home/user
 RUN wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py' ; python3 get-pip.py --disable-pip-version-check --no-cache-dir
